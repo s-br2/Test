@@ -168,9 +168,11 @@
   .modal-overlay { padding: 0; align-items: stretch; background: #fff; }
   .modal { max-width: 100% !important; width: 100%; min-height: 100vh; min-height: 100dvh; border-radius: 0; padding: 18px; background: #fff; }
   input, select, textarea { font-size: 16px; } /* verhindert Auto-Zoom beim Tippen auf iOS/Android */
-  .ing-grid { grid-template-columns: 50px 50px 1fr 24px; }
-  .ing-grid input[data-f="stepCategories"], .ing-grid input[data-f="shoppingCategories"],
+  .ing-grid { grid-template-columns: 50px 50px 1fr 22px 22px; }
+  .ing-options-panel { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; background: var(--surface-1); border-radius: var(--radius); padding: 8px; margin: 2px 0 8px; }
+  .ing-grid > input[data-f="stepCategories"], .ing-grid > input[data-f="shoppingCategories"],
   .ing-header-row span:nth-child(4), .ing-header-row span:nth-child(5) { display: none; }
+  .ing-options-panel input { display: block !important; font-size: 13px; }
   .desktop-only-btn { display: none !important; }
   .mobile-only-btn { display: block; }
   #mobileToolGrid { display: grid; }
@@ -545,6 +547,7 @@ async function chooseDirectory() {
     dirHandle = handle;
     await setMeta("dirHandle", handle);
     await loadFromFile();
+    if (ensureDefaultCountryTags()) { await persist(); }
     updateStorageStatus();
     render();
   } catch (e) { /* Nutzer hat abgebrochen */ }
@@ -555,6 +558,7 @@ async function reconnectDirectory() {
     const perm = await dirHandle.requestPermission({ mode: "readwrite" });
     if (perm === "granted") {
       await loadFromFile();
+      if (ensureDefaultCountryTags()) { await persist(); }
       updateStorageStatus();
       render();
     }
@@ -611,14 +615,53 @@ function defaultTagCategories() {
       { name: "Laktosefrei" }, { name: "Glutenfrei" }, { name: "Nussfrei" }
     ]},
     { id: "laenderkueche", name: "Länderküche", icons: true, tags: [
-      { name: "Italien", flag: "it" },
-      { name: "Spanien", flag: "es" },
       { name: "Deutsch", flag: "de" },
-      { name: "Französisch", flag: "fr" }
+      { name: "Italienisch", flag: "it" },
+      { name: "Spanisch", flag: "es" },
+      { name: "Französisch", flag: "fr" },
+      { name: "Portugiesisch", flag: "pt" },
+      { name: "Griechenland", flag: "gr" },
+      { name: "Britisch", flag: "gb" },
+      { name: "Levantinisch", flag: "globe" },
+      { name: "Marokkanisch", flag: "ma" },
+      { name: "Polnisch", flag: "pl" },
+      { name: "Russisch", flag: "ru" },
+      { name: "Skandinavisch", flag: "globe" },
+      { name: "Balkan", flag: "globe" },
+      { name: "US-Amerikanisch", flag: "us" },
+      { name: "Indisch", flag: "in" },
+      { name: "Afghanisch/Pakistanisch", flag: "globe" },
+      { name: "Thailändisch", flag: "th" },
+      { name: "Vietnamesisch", flag: "vn" },
+      { name: "Japanisch", flag: "jp" },
+      { name: "Chinesisch", flag: "cn" },
+      { name: "Mittelamerikanisch", flag: "globe" },
+      { name: "Brasilianisch", flag: "br" },
+      { name: "Peruanisch", flag: "pe" },
+      { name: "Kolumbianisch", flag: "co" },
+      { name: "Argentinisch", flag: "ar" }
     ]}
   ];
 }
 let tagCategories = defaultTagCategories();
+
+// Ergänzt neu hinzugekommene Länder/Regionen bei "Länderküche" in bereits
+// vorhandenen, gespeicherten Kochbüchern - ohne etwas Bestehendes zu entfernen.
+function ensureDefaultCountryTags() {
+  const defaults = defaultTagCategories().find(c => c.id === "laenderkueche");
+  if (!defaults) return false;
+  let cat = tagCategories.find(c => c.id === "laenderkueche");
+  let changed = false;
+  if (!cat) {
+    tagCategories.push(defaults);
+    return true;
+  }
+  defaults.tags.forEach(dt => {
+    const exists = cat.tags.some(t => (t.name || "").trim().toLowerCase() === dt.name.toLowerCase());
+    if (!exists) { cat.tags.push({ ...dt }); changed = true; }
+  });
+  return changed;
+}
 let pantryItems = []; // [{name, amount, unit}] – Vorrat für "Inspirationen"
 let shoppingList = []; // [{id, name, amount, unit, category}]
 
@@ -628,7 +671,24 @@ const FLAG_SVGS = {
   it: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="1" height="2" fill="#009246"/><rect width="1" height="2" x="1" fill="#f1f2f1"/><rect width="1" height="2" x="2" fill="#ce2b37"/></svg>',
   es: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#aa151b"/><rect width="3" height="1" y="0.5" fill="#f1bf00"/></svg>',
   de: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="0.667" fill="#000"/><rect width="3" height="0.667" y="0.667" fill="#dd0000"/><rect width="3" height="0.666" y="1.334" fill="#ffce00"/></svg>',
-  fr: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="1" height="2" fill="#0055a4"/><rect width="1" height="2" x="1" fill="#f1f2f1"/><rect width="1" height="2" x="2" fill="#ef4135"/></svg>'
+  fr: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="1" height="2" fill="#0055a4"/><rect width="1" height="2" x="1" fill="#f1f2f1"/><rect width="1" height="2" x="2" fill="#ef4135"/></svg>',
+  pt: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="1.2" height="2" fill="#046a38"/><rect width="1.8" height="2" x="1.2" fill="#da291c"/></svg>',
+  gr: '<svg width="18" height="12" viewBox="0 0 9 6" style="vertical-align:-2px; border-radius:2px;"><rect width="9" height="6" fill="#0d5eaf"/><rect width="9" height="0.667" y="0.667" fill="#fff"/><rect width="9" height="0.667" y="2" fill="#fff"/><rect width="9" height="0.667" y="3.333" fill="#fff"/><rect width="9" height="0.667" y="4.667" fill="#fff"/><rect width="3.667" height="3.667" fill="#0d5eaf"/><rect width="3.667" height="1.222" y="1.222" fill="#fff"/><rect width="1.222" height="3.667" x="1.222" fill="#fff"/></svg>',
+  gb: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#00247d"/><rect width="3" height="0.34" y="0.83" fill="#fff"/><rect width="0.34" height="2" x="1.33" fill="#fff"/><rect width="3" height="0.2" y="0.9" fill="#cf142b"/><rect width="0.2" height="2" x="1.4" fill="#cf142b"/></svg>',
+  ma: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#c1272d"/><path d="M1.5 0.7 L1.62 1.02 L1.96 1.02 L1.68 1.22 L1.79 1.55 L1.5 1.35 L1.21 1.55 L1.32 1.22 L1.04 1.02 L1.38 1.02 Z" fill="#006233"/></svg>',
+  pl: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="1" fill="#fff"/><rect width="3" height="1" y="1" fill="#dc143c"/></svg>',
+  ru: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="0.667" fill="#fff"/><rect width="3" height="0.667" y="0.667" fill="#0039a6"/><rect width="3" height="0.666" y="1.334" fill="#d52b1e"/></svg>',
+  us: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#b22234"/><rect width="3" height="0.154" y="0.154" fill="#fff"/><rect width="3" height="0.154" y="0.462" fill="#fff"/><rect width="3" height="0.154" y="0.769" fill="#fff"/><rect width="3" height="0.154" y="1.077" fill="#fff"/><rect width="3" height="0.154" y="1.385" fill="#fff"/><rect width="3" height="0.154" y="1.692" fill="#fff"/><rect width="1.2" height="1.077" fill="#3c3b6e"/></svg>',
+  in: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="0.667" fill="#ff9933"/><rect width="3" height="0.667" y="0.667" fill="#fff"/><rect width="3" height="0.666" y="1.334" fill="#138808"/><circle cx="1.5" cy="1" r="0.2" fill="none" stroke="#000080" stroke-width="0.04"/></svg>',
+  th: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#a51931"/><rect width="3" height="1.333" y="0.333" fill="#f4f5f8"/><rect width="3" height="0.667" y="0.667" fill="#2d2a4a"/></svg>',
+  vn: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#da251d"/><path d="M1.5 0.6 L1.62 0.95 L1.98 0.95 L1.68 1.15 L1.79 1.5 L1.5 1.3 L1.21 1.5 L1.32 1.15 L1.02 0.95 L1.38 0.95 Z" fill="#ffff00"/></svg>',
+  jp: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#fff"/><circle cx="1.5" cy="1" r="0.6" fill="#bc002d"/></svg>',
+  cn: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#de2910"/><path d="M0.5 0.4 L0.62 0.75 L0.98 0.75 L0.68 0.95 L0.79 1.3 L0.5 1.1 L0.21 1.3 L0.32 0.95 L0.02 0.75 L0.38 0.75 Z" fill="#ffde00"/></svg>',
+  br: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#009739"/><path d="M1.5 0.35 L2.65 1 L1.5 1.65 L0.35 1 Z" fill="#fedd00"/><circle cx="1.5" cy="1" r="0.35" fill="#012169"/></svg>',
+  pe: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="1" height="2" fill="#d91023"/><rect width="1" height="2" x="1" fill="#fff"/><rect width="1" height="2" x="2" fill="#d91023"/></svg>',
+  co: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="1" fill="#fcd116"/><rect width="3" height="0.5" y="1" fill="#003893"/><rect width="3" height="0.5" y="1.5" fill="#ce1126"/></svg>',
+  ar: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="0.667" fill="#74acdf"/><rect width="3" height="0.667" y="0.667" fill="#fff"/><rect width="3" height="0.666" y="1.334" fill="#74acdf"/><circle cx="1.5" cy="1" r="0.22" fill="#f6b40e"/></svg>',
+  globe: '<svg width="18" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="vertical-align:-3px;"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3.2" y1="9" x2="20.8" y2="9"/><line x1="3.2" y1="15" x2="20.8" y2="15"/></svg>'
 };
 function tagIconHtml(t) {
   if (t.flag && FLAG_SVGS[t.flag]) return FLAG_SVGS[t.flag] + " ";
@@ -711,6 +771,7 @@ openDB().then(async () => {
     }
   }
   if (recipes.length === 0 && !dirHandle) recipes.push(seedRecipe());
+  if (ensureDefaultCountryTags()) { await persist(); }
   updateStorageStatus();
   render();
 }).catch(err => {
@@ -2190,7 +2251,7 @@ function openEditor(recipe) {
 
       <div class="field-label">Zutaten</div>
       <div class="ing-grid ing-header-row">
-        <span>Menge</span><span>Einheit</span><span>Zutat</span><span>Kochschritt/Element</span><span>Einkaufen</span><span></span>
+        <span>Menge</span><span>Einheit</span><span>Zutat</span><span>Kochschritt/Element</span><span>Einkaufen</span><span></span><span></span>
       </div>
       <div id="ingRows" class="ing-grid"></div>
       <button id="addIngBtn" style="margin-top:4px; font-size:12px;">+ Zutat</button>
@@ -2345,6 +2406,7 @@ function openEditor(recipe) {
   renderQuickTagCategories();
 
   /* ingredients */
+  let expandedIngRows = new Set();
   function renderIngRows() {
     const box = document.getElementById("ingRows");
     box.innerHTML = "";
@@ -2369,6 +2431,10 @@ function openEditor(recipe) {
       shopInput.placeholder = "z.B. Fleisch"; shopInput.value = (ing.shoppingCategories || []).join(", "); shopInput.dataset.f = "shoppingCategories";
       shopInput.setAttribute("list", "shoppingCategoryOptions");
 
+      const optionsBtn = document.createElement("button");
+      optionsBtn.type = "button"; optionsBtn.className = "remove-btn"; optionsBtn.title = "Weitere Optionen (Kategorien, Einheit umrechnen)";
+      optionsBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>';
+
       const removeBtn = document.createElement("button");
       removeBtn.className = "remove-btn"; removeBtn.textContent = "×"; removeBtn.type = "button";
 
@@ -2383,12 +2449,33 @@ function openEditor(recipe) {
         else ing[f] = inp.value;
         renderStepRows(); // keep chip pickers in sync with ingredient names
       }));
+      optionsBtn.addEventListener("click", () => {
+        if (expandedIngRows.has(idx)) expandedIngRows.delete(idx); else expandedIngRows.add(idx);
+        renderIngRows();
+      });
       removeBtn.addEventListener("click", () => {
         draft.ingredients.splice(idx, 1);
+        expandedIngRows.delete(idx);
         renderIngRows(); renderStepRows();
       });
 
-      box.append(amtInput, unitInput, nameInput, stepInput, shopInput, removeBtn);
+      box.append(amtInput, unitInput, nameInput, optionsBtn, removeBtn);
+
+      if (expandedIngRows.has(idx)) {
+        const panel = document.createElement("div");
+        panel.className = "ing-options-panel";
+        const stepLabel = document.createElement("label");
+        stepLabel.style.cssText = "font-size:11px; color:var(--text-muted);";
+        stepLabel.textContent = "Kochschritt/Element";
+        const shopLabel = document.createElement("label");
+        shopLabel.style.cssText = "font-size:11px; color:var(--text-muted);";
+        shopLabel.textContent = "Einkaufen";
+        panel.append(stepLabel, stepInput, shopLabel, shopInput);
+        attachUnitConverter(amtInput, unitInput, () => {
+          amtInput.dispatchEvent(new Event("input"));
+        });
+        box.appendChild(panel);
+      }
     });
   }
   document.getElementById("addIngBtn").addEventListener("click", () => {
