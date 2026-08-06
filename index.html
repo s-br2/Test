@@ -233,9 +233,10 @@
       </div>
       <button id="newRecipeBtn" class="primary" style="width:100%; margin:14px 0;">+ Neues Rezept</button>
       <button id="pdfExportBtnDesktop" class="desktop-only-btn" style="width:100%; margin-bottom:6px; font-size:13px;">Drucken / PDF</button>
-      <button id="inspirationBtnDesktop" class="desktop-only-btn" style="width:100%; margin-bottom:14px; font-size:13px;">Inspirationen</button>
+      <button id="inspirationBtnDesktop" class="desktop-only-btn" style="width:100%; margin-bottom:6px; font-size:13px;">Inspirationen</button>
+      <button id="tipsBtnDesktop" class="desktop-only-btn" style="width:100%; margin-bottom:14px; font-size:13px;">Tipps</button>
       <div class="mobile-only-btn filter-group-title">Werkzeuge</div>
-      <div id="mobileToolGrid" class="mobile-only-btn" style="grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:14px;">
+      <div id="mobileToolGrid" class="mobile-only-btn" style="grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:14px;">
         <button id="shoppingListBtn" class="icon-tool-btn" title="Einkaufsliste">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         </button>
@@ -244,6 +245,9 @@
         </button>
         <button id="inspirationBtn" class="icon-tool-btn" title="Inspirationen">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.9c.5.4.8 1 .8 1.6V17h6.4v-.5c0-.6.3-1.2.8-1.6A7 7 0 0 0 12 2z"/></svg>
+        </button>
+        <button id="tipsBtn" class="icon-tool-btn" title="Tipps">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M12 16c0-2 2-2.5 2.5-4.5S13.5 7 12 7s-2.5 2-2.5 4.5"/><circle cx="12" cy="12" r="9"/></svg>
         </button>
       </div>
       <div id="filterGroups"></div>
@@ -354,6 +358,43 @@
   </div>
 </div>
 
+<div id="tipsOverlay" class="modal-overlay" style="display:none;">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h2 style="margin:0;">Tipps</h2>
+      <button class="ghost" id="closeTipsBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+    </div>
+
+    <div id="tipsListView">
+      <button id="addTipBtn" class="primary" style="width:100%; margin-bottom:14px;">+ Neuer Tipp</button>
+      <div id="tipsList"></div>
+    </div>
+
+    <div id="tipsFormView" style="display:none;">
+      <button class="ghost" id="tipsFormBackBtn" style="margin-bottom:10px; display:flex; align-items:center; gap:6px; font-size:13px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg> Zurück
+      </button>
+      <div class="field-label" style="margin-top:0;">Überschrift</div>
+      <input id="tipTitleInput" placeholder="Titel des Tipps" />
+      <div class="field-label">Text</div>
+      <textarea id="tipTextInput" rows="6" placeholder="Dein Tipp, Notiz oder Idee..."></textarea>
+      <div class="field-label">Bilder</div>
+      <div id="tipImgDropzone" class="dropzone">Bilder hierher ziehen oder klicken zum Auswählen</div>
+      <input type="file" id="tipImagesInput" accept="image/*" multiple style="display:none;" />
+      <button id="tipCameraBtn" class="mobile-only-btn" style="width:100%; margin-top:6px; font-size:13px; display:flex; align-items:center; justify-content:center; gap:6px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Foto aufnehmen
+      </button>
+      <input type="file" id="tipCameraInput" accept="image/*" capture="environment" style="display:none;" />
+      <div class="thumbstrip" id="tipImgStrip"></div>
+      <div style="display:flex; gap:8px; margin-top:16px;">
+        <button class="primary" id="saveTipBtn" style="flex:1;">Speichern</button>
+        <button id="deleteTipBtn" class="ghost" style="display:none;">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="imageLightbox" class="modal-overlay no-print" style="display:none; background:rgba(0,0,0,.85); align-items:center; padding:20px; z-index:250;">
   <button id="closeLightboxBtn" style="position:absolute; top:16px; right:16px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.15); color:#fff; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
   <img id="lightboxImg" src="" style="max-width:100%; max-height:90vh; border-radius:4px; box-shadow:0 4px 24px rgba(0,0,0,.4);" />
@@ -368,12 +409,8 @@
       <button class="ghost" id="closeSettingsBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
     </div>
 
-    <div class="field-label" style="margin-top:0;">Speicherort</div>
-    <div id="storageStatus" style="font-size:13px; margin-bottom:10px;"></div>
-    <button id="chooseDirBtn" style="width:100%; font-size:13px;">Ordner wählen</button>
-    <button id="reconnectDirBtn" style="width:100%; font-size:13px; margin-top:6px; display:none; background:var(--accent); color:#fff;">Zugriff erneut bestätigen</button>
-
-    <div class="field-label">Datensicherung</div>
+    <div class="field-label" style="margin-top:0;">Speicherung & Sicherung</div>
+    <p class="muted" style="font-size:11px; margin:0 0 10px;">Deine Daten liegen hier automatisch im Speicher dieses Handys/Browsers (offline nutzbar). Ein direktes Verbinden mit einem Cloud-Ordner ist auf dem Handy technisch nicht möglich. Um Rezepte, Kategorien, Vorrat, Einkaufsliste und Tipps mit deiner PC-Version abzugleichen, nutze regelmäßig die Sicherung unten (herunterladen am PC, in der App wiederherstellen — oder umgekehrt).</p>
     <button id="exportBtn" style="width:100%; margin-bottom:6px; font-size:13px;">Sicherung herunterladen</button>
     <button id="importBtn" style="width:100%; font-size:13px;">Sicherung wiederherstellen</button>
     <input type="file" id="importFile" accept="application/json" style="display:none;" />
@@ -477,118 +514,22 @@ function setMeta(key, value) {
 }
 
 /* ---------- Datei-Speicherung (File System Access API, Chrome/Edge) ---------- */
-let dirHandle = null;
-const fsSupported = "showDirectoryPicker" in window;
+let dirHandle = null; // In der App-Version bewusst ungenutzt (siehe unten)
 let saveQueue = Promise.resolve();
 
-function saveToFile() {
-  // Reiht Schreibvorgänge nacheinander ein, damit zwei fast gleichzeitige
-  // Änderungen (z.B. neuer Tag + Rezept speichern) sich nicht überschreiben.
-  saveQueue = saveQueue.then(() => saveToFileNow()).catch(e => console.error(e));
-  return saveQueue;
-}
-async function saveToFileNow() {
-  if (!dirHandle) return;
-  try {
-    const perm = await dirHandle.queryPermission({ mode: "readwrite" });
-    if (perm !== "granted") return;
-    const fileHandle = await dirHandle.getFileHandle("rezepte.json", { create: true });
-    const writable = await fileHandle.createWritable();
-    await writable.write(JSON.stringify({ recipes, tagCategories, pantryItems, shoppingList, updatedAt: Date.now() }, null, 2));
-    await writable.close();
-  } catch (e) {
-    console.error("Konnte nicht in die Datei schreiben:", e);
-  }
-}
-async function loadFromFile() {
-  try {
-    const fileHandle = await dirHandle.getFileHandle("rezepte.json", { create: false });
-    const file = await fileHandle.getFile();
-    const text = await file.text();
-    const data = text.trim() ? JSON.parse(text) : {};
-    let fileRecipes, fileCats, filePantry, fileShopping, fileUpdatedAt;
-    if (Array.isArray(data)) {
-      fileRecipes = data; fileCats = tagCategories; filePantry = pantryItems; fileShopping = shoppingList; fileUpdatedAt = 0; // altes Format
-    } else {
-      fileRecipes = data.recipes || []; fileCats = data.tagCategories || tagCategories;
-      filePantry = data.pantryItems || []; fileShopping = data.shoppingList || []; fileUpdatedAt = data.updatedAt || 0;
-    }
-    let localUpdatedAt = 0;
-    try { localUpdatedAt = (await getMeta("lastSavedAt")) || 0; } catch (e) {}
-    if (localUpdatedAt > fileUpdatedAt) {
-      // Browser-Speicher ist neuer als die Datei (z.B. weil der Ordner-Zugriff
-      // zwischenzeitlich neu bestätigt werden musste) -> Datei mit dem
-      // aktuelleren lokalen Stand auffrischen, statt ihn zu überschreiben.
-      await saveToFile();
-    } else {
-      recipes = fileRecipes;
-      tagCategories = fileCats;
-      pantryItems = filePantry;
-      shoppingList = fileShopping;
-    }
-  } catch (e) {
-    // Noch keine Datei in diesem Ordner: aktuelle Rezepte dorthin migrieren.
-    await saveToFile();
-  }
-}
+// Die App-Version verzichtet bewusst auf eine Ordner-Verknüpfung (File System
+// Access API): Android unterstützt das technisch nicht, und ein Test am PC
+// führte zu einer zweiten, unabhängigen Rezeptdatei. Speicherung läuft hier
+// ausschließlich über den Browser-Speicher (IndexedDB) + manuelle Sicherung.
+function saveToFile() { return Promise.resolve(); }
 async function persist() {
   try {
     await setMeta("tagCategories", tagCategories);
     await setMeta("pantryItems", pantryItems);
     await setMeta("shoppingList", shoppingList);
+    await setMeta("tips", tips);
     await setMeta("lastSavedAt", Date.now());
   } catch (e) {}
-  await saveToFile();
-}
-async function chooseDirectory() {
-  if (!fsSupported) return;
-  try {
-    const handle = await window.showDirectoryPicker();
-    dirHandle = handle;
-    await setMeta("dirHandle", handle);
-    await loadFromFile();
-    if (ensureDefaultCountryTags()) { await persist(); }
-    updateStorageStatus();
-    render();
-  } catch (e) { /* Nutzer hat abgebrochen */ }
-}
-async function reconnectDirectory() {
-  if (!dirHandle) return;
-  try {
-    const perm = await dirHandle.requestPermission({ mode: "readwrite" });
-    if (perm === "granted") {
-      await loadFromFile();
-      if (ensureDefaultCountryTags()) { await persist(); }
-      updateStorageStatus();
-      render();
-    }
-  } catch (e) { console.error(e); }
-}
-async function updateStorageStatus() {
-  const el = document.getElementById("storageStatus");
-  const btn = document.getElementById("chooseDirBtn");
-  const reconnectBtn = document.getElementById("reconnectDirBtn");
-  if (!fsSupported) {
-    el.innerHTML = '<span class="muted">In diesem Browser nicht verfügbar — bitte regelmäßig "Sicherung herunterladen" nutzen.</span>';
-    btn.style.display = "none";
-    reconnectBtn.style.display = "none";
-    return;
-  }
-  if (!dirHandle) {
-    el.innerHTML = '<span class="muted">Noch nicht verbunden — Rezepte liegen nur im Browser.</span>';
-    btn.textContent = "Ordner wählen";
-    reconnectBtn.style.display = "none";
-    return;
-  }
-  const perm = await dirHandle.queryPermission({ mode: "readwrite" });
-  if (perm === "granted") {
-    el.innerHTML = `Verbunden mit Ordner <strong>${escapeHtml(dirHandle.name)}</strong> <span class="muted">(rezepte.json)</span>`;
-    btn.textContent = "Ordner wechseln";
-    reconnectBtn.style.display = "none";
-  } else {
-    el.innerHTML = `<span class="muted">Zugriff auf <strong>${escapeHtml(dirHandle.name)}</strong> nicht mehr bestätigt.</span>`;
-    reconnectBtn.style.display = "block";
-  }
 }
 
 /* ---------- State ---------- */
@@ -622,20 +563,21 @@ function defaultTagCategories() {
       { name: "Portugiesisch", flag: "pt" },
       { name: "Griechenland", flag: "gr" },
       { name: "Britisch", flag: "gb" },
-      { name: "Levantinisch", flag: "globe" },
+      { name: "Levantinisch", flag: "il" },
       { name: "Marokkanisch", flag: "ma" },
+      { name: "Afrikanisch", flag: "za" },
       { name: "Polnisch", flag: "pl" },
       { name: "Russisch", flag: "ru" },
-      { name: "Skandinavisch", flag: "globe" },
-      { name: "Balkan", flag: "globe" },
+      { name: "Skandinavisch", flag: "no" },
+      { name: "Balkan", flag: "al" },
       { name: "US-Amerikanisch", flag: "us" },
       { name: "Indisch", flag: "in" },
-      { name: "Afghanisch/Pakistanisch", flag: "globe" },
+      { name: "Afghanisch", flag: "af" },
       { name: "Thailändisch", flag: "th" },
       { name: "Vietnamesisch", flag: "vn" },
       { name: "Japanisch", flag: "jp" },
       { name: "Chinesisch", flag: "cn" },
-      { name: "Mittelamerikanisch", flag: "globe" },
+      { name: "Mittelamerikanisch", flag: "cr" },
       { name: "Brasilianisch", flag: "br" },
       { name: "Peruanisch", flag: "pe" },
       { name: "Kolumbianisch", flag: "co" },
@@ -656,14 +598,33 @@ function ensureDefaultCountryTags() {
     tagCategories.push(defaults);
     return true;
   }
+  // Umbenennung "Afghanisch/Pakistanisch" -> "Afghanisch": bestehenden Eintrag
+  // (inkl. bereits vergebener Rezept-Tags) mitziehen statt einen zweiten anzulegen.
+  const oldAfghan = cat.tags.find(t => (t.name || "").trim().toLowerCase() === "afghanisch/pakistanisch");
+  if (oldAfghan && !cat.tags.some(t => (t.name || "").trim().toLowerCase() === "afghanisch")) {
+    recipes.forEach(r => {
+      if (!r.tags) return;
+      const idx = r.tags.indexOf(oldAfghan.name);
+      if (idx >= 0) { r.tags[idx] = "Afghanisch"; changed = true; }
+    });
+    oldAfghan.name = "Afghanisch";
+    oldAfghan.flag = "af";
+    changed = true;
+  }
   defaults.tags.forEach(dt => {
     const exists = cat.tags.some(t => (t.name || "").trim().toLowerCase() === dt.name.toLowerCase());
     if (!exists) { cat.tags.push({ ...dt }); changed = true; }
+    else {
+      // Flagge nachziehen, falls sich das Symbol für einen bestehenden Eintrag geändert hat
+      const existing = cat.tags.find(t => (t.name || "").trim().toLowerCase() === dt.name.toLowerCase());
+      if (existing && existing.flag !== dt.flag) { existing.flag = dt.flag; changed = true; }
+    }
   });
   return changed;
 }
 let pantryItems = []; // [{name, amount, unit}] – Vorrat für "Inspirationen"
 let shoppingList = []; // [{id, name, amount, unit, category}]
+let tips = []; // [{id, title, text, images:[dataURL...], createdAt}]
 
 // Eingebettete Flaggen-Grafiken statt Emoji: Emoji-Flaggen werden auf manchen
 // Systemen (v.a. Windows) nur als Buchstabencode dargestellt, das umgehen wir so.
@@ -674,7 +635,7 @@ const FLAG_SVGS = {
   fr: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="1" height="2" fill="#0055a4"/><rect width="1" height="2" x="1" fill="#f1f2f1"/><rect width="1" height="2" x="2" fill="#ef4135"/></svg>',
   pt: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="1.2" height="2" fill="#046a38"/><rect width="1.8" height="2" x="1.2" fill="#da291c"/></svg>',
   gr: '<svg width="18" height="12" viewBox="0 0 9 6" style="vertical-align:-2px; border-radius:2px;"><rect width="9" height="6" fill="#0d5eaf"/><rect width="9" height="0.667" y="0.667" fill="#fff"/><rect width="9" height="0.667" y="2" fill="#fff"/><rect width="9" height="0.667" y="3.333" fill="#fff"/><rect width="9" height="0.667" y="4.667" fill="#fff"/><rect width="3.667" height="3.667" fill="#0d5eaf"/><rect width="3.667" height="1.222" y="1.222" fill="#fff"/><rect width="1.222" height="3.667" x="1.222" fill="#fff"/></svg>',
-  gb: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#00247d"/><rect width="3" height="0.34" y="0.83" fill="#fff"/><rect width="0.34" height="2" x="1.33" fill="#fff"/><rect width="3" height="0.2" y="0.9" fill="#cf142b"/><rect width="0.2" height="2" x="1.4" fill="#cf142b"/></svg>',
+  gb: '<svg width="18" height="12" viewBox="0 0 30 20" style="vertical-align:-2px; border-radius:2px;"><rect width="30" height="20" fill="#012169"/><line x1="0" y1="0" x2="30" y2="20" stroke="#fff" stroke-width="4"/><line x1="30" y1="0" x2="0" y2="20" stroke="#fff" stroke-width="4"/><line x1="0" y1="0" x2="30" y2="20" stroke="#c8102e" stroke-width="1.6"/><line x1="30" y1="0" x2="0" y2="20" stroke="#c8102e" stroke-width="1.6"/><rect x="12" width="6" height="20" fill="#fff"/><rect y="7" width="30" height="6" fill="#fff"/><rect x="13.3" width="3.4" height="20" fill="#c8102e"/><rect y="8.3" width="30" height="3.4" fill="#c8102e"/></svg>',
   ma: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#c1272d"/><path d="M1.5 0.7 L1.62 1.02 L1.96 1.02 L1.68 1.22 L1.79 1.55 L1.5 1.35 L1.21 1.55 L1.32 1.22 L1.04 1.02 L1.38 1.02 Z" fill="#006233"/></svg>',
   pl: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="1" fill="#fff"/><rect width="3" height="1" y="1" fill="#dc143c"/></svg>',
   ru: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="0.667" fill="#fff"/><rect width="3" height="0.667" y="0.667" fill="#0039a6"/><rect width="3" height="0.666" y="1.334" fill="#d52b1e"/></svg>',
@@ -688,6 +649,12 @@ const FLAG_SVGS = {
   pe: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="1" height="2" fill="#d91023"/><rect width="1" height="2" x="1" fill="#fff"/><rect width="1" height="2" x="2" fill="#d91023"/></svg>',
   co: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="1" fill="#fcd116"/><rect width="3" height="0.5" y="1" fill="#003893"/><rect width="3" height="0.5" y="1.5" fill="#ce1126"/></svg>',
   ar: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="0.667" fill="#74acdf"/><rect width="3" height="0.667" y="0.667" fill="#fff"/><rect width="3" height="0.666" y="1.334" fill="#74acdf"/><circle cx="1.5" cy="1" r="0.22" fill="#f6b40e"/></svg>',
+  no: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#ba0c2f"/><rect x="0.9" width="0.5" height="2" fill="#fff"/><rect y="0.75" width="3" height="0.5" fill="#fff"/><rect x="1.05" width="0.2" height="2" fill="#00205b"/><rect y="0.9" width="3" height="0.2" fill="#00205b"/></svg>',
+  cr: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#002b7f"/><rect width="3" height="1.333" y="0.333" fill="#fff"/><rect width="3" height="0.667" y="0.667" fill="#ce1126"/></svg>',
+  il: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#fff"/><rect width="3" height="0.22" y="0.25" fill="#0038b8"/><rect width="3" height="0.22" y="1.53" fill="#0038b8"/><polygon points="1.5,0.7 1.75,1.15 1.25,1.15" fill="none" stroke="#0038b8" stroke-width="0.07"/><polygon points="1.5,1.3 1.75,0.85 1.25,0.85" fill="none" stroke="#0038b8" stroke-width="0.07"/></svg>',
+  al: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#e41e20"/><circle cx="1.5" cy="1" r="0.26" fill="#000"/><polygon points="1.5,0.75 1.0,0.55 1.15,0.95 0.85,1.0 1.2,1.15 1.0,1.45 1.5,1.25" fill="#000"/><polygon points="1.5,0.75 2.0,0.55 1.85,0.95 2.15,1.0 1.8,1.15 2.0,1.45 1.5,1.25" fill="#000"/></svg>',
+  af: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="1" height="2" fill="#000"/><rect width="1" height="2" x="1" fill="#d32011"/><rect width="1" height="2" x="2" fill="#007a36"/></svg>',
+  za: '<svg width="18" height="12" viewBox="0 0 3 2" style="vertical-align:-2px; border-radius:2px;"><rect width="3" height="2" fill="#fff"/><polygon points="0,0 3,0.55 3,0" fill="#e03c31"/><polygon points="0,2 3,1.45 3,2" fill="#001489"/><polygon points="0,0.15 1.3,1 0,1.85" fill="#000"/><polygon points="0,0.35 1.5,1 0,1.65" fill="#ffb612"/><polygon points="0,0.5 1.6,1 0,1.5" fill="#007749"/></svg>',
   globe: '<svg width="18" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="vertical-align:-3px;"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3.2" y1="9" x2="20.8" y2="9"/><line x1="3.2" y1="15" x2="20.8" y2="15"/></svg>'
 };
 function tagIconHtml(t) {
@@ -762,17 +729,17 @@ openDB().then(async () => {
     if (storedShopping) shoppingList = storedShopping;
   } catch (e) {}
   try {
-    dirHandle = await getMeta("dirHandle");
-  } catch (e) { dirHandle = null; }
-  if (dirHandle) {
-    const perm = await dirHandle.queryPermission({ mode: "readwrite" });
-    if (perm === "granted") {
-      await loadFromFile();
-    }
-  }
-  if (recipes.length === 0 && !dirHandle) recipes.push(seedRecipe());
+    const storedTips = await getMeta("tips");
+    if (storedTips) tips = storedTips;
+  } catch (e) {}
+  // Die Ordner-Verknüpfung ("Ordner wählen") gibt es in der App-Version bewusst
+  // nicht mehr (auf dem Handy technisch nicht möglich, führte beim Testen am PC
+  // zu einer zweiten, unabhängigen Rezeptdatei). Eine evtl. früher gespeicherte
+  // Verknüpfung wird hier endgültig entfernt, damit sie nie wieder aktiv wird.
+  dirHandle = null;
+  try { await setMeta("dirHandle", null); } catch (e) {}
+  if (recipes.length === 0) recipes.push(seedRecipe());
   if (ensureDefaultCountryTags()) { await persist(); }
-  updateStorageStatus();
   render();
 }).catch(err => {
   document.getElementById("grid").innerHTML =
@@ -1721,6 +1688,116 @@ document.getElementById("copyShoppingTextBtn").addEventListener("click", async (
   }
 });
 
+/* ---------- Tipps ---------- */
+let editingTipId = null;
+let currentTipImages = [];
+
+function openTipsModal() {
+  forceCloseSidebarSilently();
+  showTipsListView();
+  document.getElementById("tipsOverlay").style.display = "flex";
+  pushModalHistory(() => { document.getElementById("tipsOverlay").style.display = "none"; });
+}
+function showTipsListView() {
+  document.getElementById("tipsFormView").style.display = "none";
+  document.getElementById("tipsListView").style.display = "block";
+  renderTipsList();
+}
+function renderTipsList() {
+  const box = document.getElementById("tipsList");
+  if (tips.length === 0) {
+    box.innerHTML = '<p class="muted" style="font-size:13px;">Noch keine Tipps gespeichert.</p>';
+    return;
+  }
+  const sorted = [...tips].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  box.innerHTML = sorted.map(tip => {
+    const thumb = tip.images && tip.images[0] ? `<img src="${tip.images[0]}" style="width:100%; height:100%; object-fit:cover;" />` : "";
+    const snippet = (tip.text || "").slice(0, 90) + ((tip.text || "").length > 90 ? "…" : "");
+    return `<div class="card" data-tipid="${tip.id}" style="cursor:pointer; display:flex; gap:10px; padding:10px; margin-bottom:8px; align-items:center;">
+      <div style="width:52px; height:52px; border-radius:var(--radius); overflow:hidden; background:var(--surface-1); flex-shrink:0; display:flex; align-items:center; justify-content:center;">${thumb}</div>
+      <div style="min-width:0;">
+        <p style="font-size:14px; font-weight:500; margin:0 0 3px;">${escapeHtml(tip.title || "Ohne Titel")}</p>
+        <p class="muted" style="font-size:12px; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(snippet)}</p>
+      </div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("[data-tipid]").forEach(card => card.addEventListener("click", () => openTipForm(card.dataset.tipid)));
+}
+function openTipForm(tipId) {
+  editingTipId = tipId || null;
+  const tip = tipId ? tips.find(t => t.id === tipId) : null;
+  document.getElementById("tipTitleInput").value = tip ? (tip.title || "") : "";
+  document.getElementById("tipTextInput").value = tip ? (tip.text || "") : "";
+  currentTipImages = tip ? [...(tip.images || [])] : [];
+  renderTipImgStrip();
+  document.getElementById("deleteTipBtn").style.display = tip ? "block" : "none";
+  document.getElementById("tipsListView").style.display = "none";
+  document.getElementById("tipsFormView").style.display = "block";
+}
+function renderTipImgStrip() {
+  const strip = document.getElementById("tipImgStrip");
+  strip.innerHTML = currentTipImages.map((img, idx) =>
+    `<div class="imgwrap"><img src="${img}" /><button class="x" data-idx="${idx}">×</button></div>`).join("");
+  strip.querySelectorAll(".x").forEach(btn => btn.addEventListener("click", () => {
+    currentTipImages.splice(parseInt(btn.dataset.idx), 1);
+    renderTipImgStrip();
+  }));
+}
+function handleTipFiles(fileList) {
+  [...fileList].filter(f => f.type.startsWith("image/")).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => { currentTipImages.push(reader.result); renderTipImgStrip(); };
+    reader.readAsDataURL(file);
+  });
+}
+document.getElementById("tipImagesInput").addEventListener("change", e => handleTipFiles(e.target.files));
+document.getElementById("tipCameraInput").addEventListener("change", e => handleTipFiles(e.target.files));
+document.getElementById("tipCameraBtn").addEventListener("click", () => document.getElementById("tipCameraInput").click());
+const tipDropzone = document.getElementById("tipImgDropzone");
+tipDropzone.addEventListener("click", () => document.getElementById("tipImagesInput").click());
+["dragenter", "dragover"].forEach(evt => tipDropzone.addEventListener(evt, e => {
+  e.preventDefault(); e.stopPropagation();
+  tipDropzone.classList.add("dragover");
+}));
+["dragleave", "drop"].forEach(evt => tipDropzone.addEventListener(evt, e => {
+  e.preventDefault(); e.stopPropagation();
+  tipDropzone.classList.remove("dragover");
+}));
+tipDropzone.addEventListener("drop", e => {
+  if (e.dataTransfer && e.dataTransfer.files) handleTipFiles(e.dataTransfer.files);
+});
+
+document.getElementById("addTipBtn").addEventListener("click", () => openTipForm(null));
+document.getElementById("tipsFormBackBtn").addEventListener("click", showTipsListView);
+document.getElementById("saveTipBtn").addEventListener("click", async () => {
+  const title = document.getElementById("tipTitleInput").value.trim();
+  const text = document.getElementById("tipTextInput").value.trim();
+  if (!title && !text && currentTipImages.length === 0) { showToast("Bitte mindestens Titel, Text oder ein Bild angeben."); return; }
+  if (editingTipId) {
+    const tip = tips.find(t => t.id === editingTipId);
+    if (tip) { tip.title = title; tip.text = text; tip.images = currentTipImages; }
+  } else {
+    tips.push({ id: uid(), title, text, images: currentTipImages, createdAt: Date.now() });
+  }
+  await persist();
+  showToast("Tipp gespeichert.");
+  showTipsListView();
+});
+document.getElementById("deleteTipBtn").addEventListener("click", () => {
+  showConfirmModal("Diesen Tipp wirklich löschen?", async () => {
+    tips = tips.filter(t => t.id !== editingTipId);
+    await persist();
+    showToast("Tipp gelöscht.");
+    showTipsListView();
+  }, "Löschen");
+});
+document.getElementById("tipsBtn").addEventListener("click", openTipsModal);
+document.getElementById("tipsBtnDesktop").addEventListener("click", openTipsModal);
+document.getElementById("closeTipsBtn").addEventListener("click", () => popModalHistory());
+document.getElementById("tipsOverlay").addEventListener("click", e => {
+  if (e.target.id === "tipsOverlay") popModalHistory();
+});
+
 function openInspirationModal() {
   forceCloseSidebarSilently();
   renderPantryRows();
@@ -1741,13 +1818,10 @@ document.getElementById("inspirationOverlay").addEventListener("click", e => {
   if (e.target.id === "inspirationOverlay") popModalHistory();
 });
 
-document.getElementById("chooseDirBtn").addEventListener("click", chooseDirectory);
-document.getElementById("reconnectDirBtn").addEventListener("click", reconnectDirectory);
 document.getElementById("settingsBtn").addEventListener("click", () => {
   forceCloseSidebarSilently();
   document.getElementById("settingsOverlay").style.display = "flex";
   pushModalHistory(() => { document.getElementById("settingsOverlay").style.display = "none"; });
-  updateStorageStatus();
   renderTagCategoryEditor();
   renderOrphanTags();
   renderIngredientConflicts();
@@ -1892,7 +1966,7 @@ function renderIngredientConflicts() {
 
 /* ---------- Backup: export / import ---------- */
 document.getElementById("exportBtn").addEventListener("click", () => {
-  const data = JSON.stringify({ recipes, tagCategories }, null, 2);
+  const data = JSON.stringify({ recipes, tagCategories, pantryItems, shoppingList, tips, updatedAt: Date.now() }, null, 2);
   const blob = new Blob([data], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -1922,7 +1996,7 @@ document.getElementById("importFile").addEventListener("change", async e => {
     return;
   }
   showConfirmModal(
-    `Sicherung gefunden mit ${imported.length} Rezept(en). Vorhandene Rezepte mit gleicher ID werden überschrieben, neue werden ergänzt.`,
+    `Sicherung gefunden mit ${imported.length} Rezept(en). Rezepte mit gleicher ID werden überschrieben, neue ergänzt. Kategorien, Vorrat, Einkaufsliste und Tipps werden komplett aus der Sicherung übernommen.`,
     async () => {
       let ok = 0, failed = 0;
       for (const rec of imported) {
@@ -1939,6 +2013,9 @@ document.getElementById("importFile").addEventListener("change", async e => {
         }
       }
       if (!Array.isArray(parsed) && parsed.tagCategories) tagCategories = parsed.tagCategories;
+      if (!Array.isArray(parsed) && parsed.pantryItems) pantryItems = parsed.pantryItems;
+      if (!Array.isArray(parsed) && parsed.shoppingList) shoppingList = parsed.shoppingList;
+      if (!Array.isArray(parsed) && parsed.tips) tips = parsed.tips;
       render();
       await persist();
       showToast(failed === 0
@@ -2058,10 +2135,16 @@ function openDetail(id) {
       return;
     }
     const main = r.images[0];
+    const thumbs = r.images.slice(1, 3);
+    const extra = r.images.length - 3; // weitere Bilder über die 3 sichtbaren hinaus
     box.innerHTML = `
       <div class="main-img"><img src="${main}" /></div>
       <div class="thumb-col">
-        ${r.images.slice(1, 3).map(img => `<div class="thumb-img"><img src="${img}" /></div>`).join("")}
+        ${thumbs.map((img, i) => {
+          const isLast = i === thumbs.length - 1;
+          const badge = (isLast && extra > 0) ? `<span style="position:absolute; bottom:4px; right:6px; background:rgba(0,0,0,.6); color:#fff; font-size:11px; padding:1px 6px; border-radius:999px;">+${extra}</span>` : "";
+          return `<div class="thumb-img" style="position:relative;"><img src="${img}" />${badge}</div>`;
+        }).join("")}
       </div>`;
     box.querySelectorAll("img").forEach(img => img.addEventListener("click", e => {
       e.stopPropagation();
@@ -2495,6 +2578,18 @@ function openEditor(recipe) {
         delete step.ingredientIndexes;
       }
       step.ingredientLinks = step.ingredientLinks || [];
+
+      const insertBtn = document.createElement("button");
+      insertBtn.type = "button";
+      insertBtn.title = "Schritt hier einfügen";
+      insertBtn.style.cssText = "width:100%; font-size:11px; padding:3px; margin-bottom:6px; border-style:dashed; color:var(--text-muted);";
+      insertBtn.textContent = "+ Schritt hier einfügen";
+      insertBtn.addEventListener("click", () => {
+        draft.steps.splice(idx, 0, { text: "", tip: "", ingredientLinks: [] });
+        renderStepRows();
+      });
+      box.appendChild(insertBtn);
+
       const row = document.createElement("div");
       row.className = "card";
       row.style.cssText = "padding:10px; margin-bottom:8px;";
@@ -2628,6 +2723,7 @@ function openEditor(recipe) {
   }
 
   async function save(asDraft) {
+    clearTimeout(autoSaveTimer);
     collect();
     draft.isDraft = asDraft;
     await putRecipe(draft);
@@ -2638,12 +2734,36 @@ function openEditor(recipe) {
     await persist();
   }
 
+  // Automatisches Zwischenspeichern als Entwurf, während bearbeitet wird –
+  // schützt vor Datenverlust, falls das Fenster/der Browser unerwartet schließt.
+  // Ein neues, noch nie gespeichertes Rezept bleibt dabei bewusst als Entwurf
+  // markiert; ein bereits vollständig gespeichertes Rezept behält seinen Status.
+  let autoSaveTimer = null;
+  async function autoSave() {
+    collect();
+    if (isNew) draft.isDraft = true;
+    try {
+      await putRecipe(draft);
+      const idx = recipes.findIndex(rec => rec.id === draft.id);
+      if (idx >= 0) recipes[idx] = draft; else recipes.push(draft);
+      await persist();
+    } catch (e) { console.error("Automatisches Speichern fehlgeschlagen:", e); }
+  }
+  overlay.addEventListener("input", () => {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(autoSave, 1200);
+  });
+  ["change", "click", "drop"].forEach(evt => overlay.addEventListener(evt, () => {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(autoSave, 1200);
+  }));
+
   document.getElementById("saveFullBtn").addEventListener("click", () => save(false));
   document.getElementById("saveDraftBtn").addEventListener("click", () => save(true));
   document.getElementById("saveFullBtnTop").addEventListener("click", () => save(false));
   document.getElementById("saveDraftBtnTop").addEventListener("click", () => save(true));
-  document.getElementById("closeEditorBtn").addEventListener("click", () => popModalHistory());
-  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+  document.getElementById("closeEditorBtn").addEventListener("click", () => { clearTimeout(autoSaveTimer); popModalHistory(); });
+  overlay.addEventListener("click", e => { if (e.target === overlay) { clearTimeout(autoSaveTimer); popModalHistory(); } });
 }
 
 /* ---------- PWA: Service Worker registrieren (nur wirksam, wenn über
