@@ -409,8 +409,15 @@
       <button class="ghost" id="closeSettingsBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
     </div>
 
-    <div class="field-label" style="margin-top:0;">Speicherung & Sicherung</div>
-    <p class="muted" style="font-size:11px; margin:0 0 10px;">Deine Daten liegen hier automatisch im Speicher dieses Handys/Browsers (offline nutzbar). Ein direktes Verbinden mit einem Cloud-Ordner ist auf dem Handy technisch nicht möglich. Um Rezepte, Kategorien, Vorrat, Einkaufsliste und Tipps mit deiner PC-Version abzugleichen, nutze regelmäßig die Sicherung unten (herunterladen am PC, in der App wiederherstellen — oder umgekehrt).</p>
+    <div class="field-label" style="margin-top:0;">Speicherort</div>
+    <p class="muted" style="font-size:11px; margin:0 0 8px;">Wähle die gleiche Datei aus, die auch deine PC-Version nutzt (z.B. über die Google-Drive- oder OneDrive-App auf dem Handy erreichbar) — dann bleiben beide automatisch synchron.</p>
+    <div id="storageStatus" style="font-size:13px; margin-bottom:10px;"></div>
+    <button id="chooseDirBtn" style="width:100%; font-size:13px;">Bestehende Datei auswählen</button>
+    <button id="createFileBtn" style="width:100%; font-size:13px; margin-top:6px;">Neue Datei anlegen</button>
+    <button id="reconnectDirBtn" style="width:100%; font-size:13px; margin-top:6px; display:none; background:var(--accent); color:#fff;">Zugriff erneut bestätigen</button>
+
+    <div class="field-label">Datensicherung</div>
+    <p class="muted" style="font-size:11px; margin:0 0 8px;">Zusätzliche, manuelle Sicherung als Datei — unabhängig vom Speicherort oben.</p>
     <button id="exportBtn" style="width:100%; margin-bottom:6px; font-size:13px;">Sicherung herunterladen</button>
     <button id="importBtn" style="width:100%; font-size:13px;">Sicherung wiederherstellen</button>
     <input type="file" id="importFile" accept="application/json" style="display:none;" />
@@ -513,15 +520,60 @@ function setMeta(key, value) {
   });
 }
 
-/* ---------- Datei-Speicherung (File System Access API, Chrome/Edge) ---------- */
-let dirHandle = null; // In der App-Version bewusst ungenutzt (siehe unten)
+/* ---------- Datei-Speicherung (File System Access API) ---------- */
+let docHandle = null; // FileSystemFileHandle auf die geteilte rezepte.json
+const fsSupported = "showOpenFilePicker" in window && "showSaveFilePicker" in window;
 let saveQueue = Promise.resolve();
 
-// Die App-Version verzichtet bewusst auf eine Ordner-Verknüpfung (File System
-// Access API): Android unterstützt das technisch nicht, und ein Test am PC
-// führte zu einer zweiten, unabhängigen Rezeptdatei. Speicherung läuft hier
-// ausschließlich über den Browser-Speicher (IndexedDB) + manuelle Sicherung.
-function saveToFile() { return Promise.resolve(); }
+function saveToFile() {
+  // Reiht Schreibvorgänge nacheinander ein, damit zwei fast gleichzeitige
+  // Änderungen (z.B. neuer Tag + Rezept speichern) sich nicht überschreiben.
+  saveQueue = saveQueue.then(() => saveToFileNow()).catch(e => console.error(e));
+  return saveQueue;
+}
+async function saveToFileNow() {
+  if (!docHandle) return;
+  try {
+    const perm = await docHandle.queryPermission({ mode: "readwrite" });
+    if (perm !== "granted") return;
+    const writable = await docHandle.createWritable();
+    await writable.write(JSON.stringify({ recipes, tagCategories, pantryItems, shoppingList, tips, updatedAt: Date.now() }, null, 2));
+    await writable.close();
+  } catch (e) {
+    console.error("Konnte nicht in die Datei schreiben:", e);
+  }
+}
+async function loadFromFile() {
+  try {
+    const file = await docHandle.getFile();
+    const text = await file.text();
+    const data = text.trim() ? JSON.parse(text) : {};
+    let fileRecipes, fileCats, filePantry, fileShopping, fileTips, fileUpdatedAt;
+    if (Array.isArray(data)) {
+      fileRecipes = data; fileCats = tagCategories; filePantry = pantryItems; fileShopping = shoppingList; fileTips = tips; fileUpdatedAt = 0; // altes Format
+    } else {
+      fileRecipes = data.recipes || []; fileCats = data.tagCategories || tagCategories;
+      filePantry = data.pantryItems || []; fileShopping = data.shoppingList || []; fileTips = data.tips || []; fileUpdatedAt = data.updatedAt || 0;
+    }
+    let localUpdatedAt = 0;
+    try { localUpdatedAt = (await getMeta("lastSavedAt")) || 0; } catch (e) {}
+    if (localUpdatedAt > fileUpdatedAt) {
+      // Browser-Speicher ist neuer als die Datei (z.B. weil der Zugriff
+      // zwischenzeitlich neu bestätigt werden musste) -> Datei mit dem
+      // aktuelleren lokalen Stand auffrischen, statt ihn zu überschreiben.
+      await saveToFile();
+    } else {
+      recipes = fileRecipes;
+      tagCategories = fileCats;
+      pantryItems = filePantry;
+      shoppingList = fileShopping;
+      tips = fileTips;
+    }
+  } catch (e) {
+    // Datei leer/neu -> aktuellen Stand hineinschreiben.
+    await saveToFile();
+  }
+}
 async function persist() {
   try {
     await setMeta("tagCategories", tagCategories);
@@ -530,6 +582,83 @@ async function persist() {
     await setMeta("tips", tips);
     await setMeta("lastSavedAt", Date.now());
   } catch (e) {}
+  await saveToFile();
+}
+// Bestehende, bereits vorhandene rezepte.json auswählen (z.B. dieselbe Datei,
+// die auch von der anderen Version genutzt wird — funktioniert für eine
+// konkrete Datei zuverlässig auch auf Android, anders als ein ganzer Ordner.
+async function chooseExistingFile() {
+  if (!fsSupported) return;
+  try {
+    const [handle] = await window.showOpenFilePicker({
+      types: [{ description: "Kochbuch-Datei", accept: { "application/json": [".json"] } }]
+    });
+    docHandle = handle;
+    await setMeta("docHandle", handle);
+    await loadFromFile();
+    if (ensureDefaultCountryTags()) { await persist(); }
+    updateStorageStatus();
+    render();
+  } catch (e) { /* Nutzer hat abgebrochen */ }
+}
+// Neue, leere rezepte.json an einem selbst gewählten Ort anlegen (für den
+// allerersten Start, wenn es noch keine gemeinsame Datei gibt).
+async function createNewFile() {
+  if (!fsSupported) return;
+  try {
+    const handle = await window.showSaveFilePicker({
+      suggestedName: "rezepte.json",
+      types: [{ description: "Kochbuch-Datei", accept: { "application/json": [".json"] } }]
+    });
+    docHandle = handle;
+    await setMeta("docHandle", handle);
+    await saveToFile();
+    updateStorageStatus();
+    render();
+  } catch (e) { /* Nutzer hat abgebrochen */ }
+}
+async function reconnectDirectory() {
+  if (!docHandle) return;
+  try {
+    const perm = await docHandle.requestPermission({ mode: "readwrite" });
+    if (perm === "granted") {
+      await loadFromFile();
+      if (ensureDefaultCountryTags()) { await persist(); }
+      updateStorageStatus();
+      render();
+    }
+  } catch (e) { console.error(e); }
+}
+async function updateStorageStatus() {
+  const el = document.getElementById("storageStatus");
+  const chooseBtn = document.getElementById("chooseDirBtn");
+  const newBtn = document.getElementById("createFileBtn");
+  const reconnectBtn = document.getElementById("reconnectDirBtn");
+  if (!fsSupported) {
+    el.innerHTML = '<span class="muted">In diesem Browser nicht verfügbar — bitte regelmäßig "Sicherung herunterladen" nutzen.</span>';
+    chooseBtn.style.display = "none";
+    newBtn.style.display = "none";
+    reconnectBtn.style.display = "none";
+    return;
+  }
+  if (!docHandle) {
+    el.innerHTML = '<span class="muted">Noch nicht verbunden — Rezepte liegen nur im Browser.</span>';
+    chooseBtn.style.display = "block";
+    newBtn.style.display = "block";
+    reconnectBtn.style.display = "none";
+    return;
+  }
+  chooseBtn.style.display = "block";
+  newBtn.style.display = "none";
+  const perm = await docHandle.queryPermission({ mode: "readwrite" });
+  if (perm === "granted") {
+    el.innerHTML = `Verbunden mit Datei <strong>${escapeHtml(docHandle.name)}</strong>`;
+    chooseBtn.textContent = "Andere Datei wählen";
+    reconnectBtn.style.display = "none";
+  } else {
+    el.innerHTML = `<span class="muted">Zugriff auf <strong>${escapeHtml(docHandle.name)}</strong> nicht mehr bestätigt.</span>`;
+    reconnectBtn.style.display = "block";
+  }
 }
 
 /* ---------- State ---------- */
@@ -732,14 +861,18 @@ openDB().then(async () => {
     const storedTips = await getMeta("tips");
     if (storedTips) tips = storedTips;
   } catch (e) {}
-  // Die Ordner-Verknüpfung ("Ordner wählen") gibt es in der App-Version bewusst
-  // nicht mehr (auf dem Handy technisch nicht möglich, führte beim Testen am PC
-  // zu einer zweiten, unabhängigen Rezeptdatei). Eine evtl. früher gespeicherte
-  // Verknüpfung wird hier endgültig entfernt, damit sie nie wieder aktiv wird.
-  dirHandle = null;
-  try { await setMeta("dirHandle", null); } catch (e) {}
-  if (recipes.length === 0) recipes.push(seedRecipe());
+  try {
+    docHandle = await getMeta("docHandle");
+  } catch (e) { docHandle = null; }
+  if (docHandle) {
+    const perm = await docHandle.queryPermission({ mode: "readwrite" });
+    if (perm === "granted") {
+      await loadFromFile();
+    }
+  }
+  if (recipes.length === 0 && !docHandle) recipes.push(seedRecipe());
   if (ensureDefaultCountryTags()) { await persist(); }
+  updateStorageStatus();
   render();
 }).catch(err => {
   document.getElementById("grid").innerHTML =
@@ -1818,10 +1951,14 @@ document.getElementById("inspirationOverlay").addEventListener("click", e => {
   if (e.target.id === "inspirationOverlay") popModalHistory();
 });
 
+document.getElementById("chooseDirBtn").addEventListener("click", chooseExistingFile);
+document.getElementById("createFileBtn").addEventListener("click", createNewFile);
+document.getElementById("reconnectDirBtn").addEventListener("click", reconnectDirectory);
 document.getElementById("settingsBtn").addEventListener("click", () => {
   forceCloseSidebarSilently();
   document.getElementById("settingsOverlay").style.display = "flex";
   pushModalHistory(() => { document.getElementById("settingsOverlay").style.display = "none"; });
+  updateStorageStatus();
   renderTagCategoryEditor();
   renderOrphanTags();
   renderIngredientConflicts();
