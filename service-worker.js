@@ -1,6 +1,6 @@
 // Bei jedem Update der App diese Versionsnummer hochzählen (v1 -> v2 -> ...),
 // damit Geräte zuverlässig merken, dass eine neue Version verfügbar ist.
-const CACHE_VERSION = "kochbuch-v6";
+const CACHE_VERSION = "kochbuch-v9";
 const APP_SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", event => {
